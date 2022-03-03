@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./keypad.js"></script>
+</head>
+<body>
+    <div class="wrap" style="width:1000px; height: 500px; border: 1px solid red;">
+        <input id="target" type="text" onclick="openKeypad(this)">
+    </div>
+    <div class="wrap" style="width:500px; height: 500px; border: 1px solid red;">
+        <input type="text" onclick="openKeypad(this)">
+    </div>
+
+    <script>
+        function openKeypad(e){
+            keypad.openKeypad(e.parentNode,e);
+        }
+        keypad.openKeypad(document.getElementById('target'));
+    </script>
+</body>
+</html>
