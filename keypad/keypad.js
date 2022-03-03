@@ -8,6 +8,8 @@ var keypad = {
     keypad : '',
     target : '',
     wrapper : '',
+    selectionStart : 0,
+    selectionEnd : 0,
     initKeyboard : function(){
         this.keyboard = document.createElement('div');
         this.keyboard.id = 'keyboard';
@@ -24,11 +26,13 @@ var keypad = {
         this.keypad.style.margin = 'auto';
 
 
-        this.keyboard.append(this.keypad);
+        this.keyboard.appendChild(this.keypad);
 
     },
-    initKeyBtn(){
-        for(num of this.shift ? this.keynums_shift : this.keynums_normal){
+    initKeyBtn : function(){
+        var keynums = this.shift ? this.keynums_shift : this.keynums_normal
+        for(var i =0; i<keynums.length; i++){
+            var num = keynums[i]
             var btn = document.createElement('div');
             btn.innerText = num;
             btn.style.boxSizing = 'border-box';
@@ -69,19 +73,23 @@ var keypad = {
             
             btn.addEventListener('click', this.keyBtnClick.bind(this));
 
-            this.keypad.append(btn);
+            this.keypad.appendChild(btn);
         }
     },
-    keyBtnClick(e){
+    keyBtnClick : function(e){
+        this.target.selectionStart = this.selectionStart;
+        this.target.selectionEnd = this.selectionEnd;
+
         var btn = e.currentTarget;
-        this.target.focus();
         var text = '';
+
         switch (btn.innerText) {
             case 'backspace':
-                this.target.value = this.target.value.substring(0,this.target.value.length-1);
+                text='';
                 break;
             case 'tab':
             case 'enter':
+                break;
             case 'caps lock':
                 this.fnCapsLock();
                 break;
@@ -90,6 +98,7 @@ var keypad = {
             case 'win':
             case 'alt':
             case '한/영':
+                break;
             case 'space':
                 text = ' ';
                 break;
@@ -106,8 +115,26 @@ var keypad = {
                 }
                 break;
         }
-        this.target.value = this.target.value + text;
-        
+        // this.target.value = this.target.value + text;
+        if(text==''){ // 삭제시
+            if(this.target.selectionStart == this.target.selectionEnd){
+                if(this.selectionStart > 0) this.selectionStart--;
+                this.target.selectionStart = this.selectionStart;
+            }
+        } else {
+            this.selectionStart++;
+        }
+        if(this.target.setRangeText){
+            this.target.setRangeText(text);
+        } else {
+            var str = this.target.value;
+            var str1 = this.target.value.substring(0,this.target.selectionStart);
+            var str2 = this.target.value.substring(this.target.selectionEnd, str.length);
+            this.target.value = str1 + text + str2;
+        }
+        this.target.focus();
+        this.target.selectionStart = this.selectionStart;
+        this.target.selectionEnd = this.selectionEnd = this.selectionStart;
     },
     openKeypad : function(wrap, tar){
         if(!this.keyboard){ // 키보드가 없으면 생성
@@ -130,7 +157,7 @@ var keypad = {
             this.keyboard.style.position = 'fixed';
         }
 
-        this.wrapper.append(this.keyboard);
+        this.wrapper.appendChild(this.keyboard);
 
         this.keyboard.style.height = '0px';
         this.keyboard.style.transform = 'unset';
@@ -140,13 +167,14 @@ var keypad = {
         }
         this.keyboard.style.transform = 'translateY(-'+this.keypad.offsetHeight+'px)';
 
-        this.target.focus();
-
+        this.selectionStart = this.target.selectionStart;
+        this.selectionEnd = this.target.selectionEnd;
+        
     },
     fnShift : function(){
         this.shift = !this.shift;
-        for(i of document.querySelectorAll('#keypad div')){
-            i.remove();
+        for(var i=0; i < document.querySelectorAll('#keypad div').length;i++){
+            document.querySelectorAll('#keypad div')[i].remove();
         }
         this.initKeyBtn();
     },
